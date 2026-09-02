@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="春酒尋籤迷宮">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#9e1c25"/>
+      <stop offset="1" stop-color="#3b0710"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#fff1a8"/>
+      <stop offset="0.5" stop-color="#f8bd3f"/>
+      <stop offset="1" stop-color="#b7650b"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <path d="M104 112h304v72h-52v-24H156v24h-52zm52 72h68v56h64v-56h68v128h-64v64h-72v-64h-64zm68 0h64v56h-64z" fill="none" stroke="url(#gold)" stroke-width="28" stroke-linejoin="round"/>
+  <path d="M210 302h92l-14 100h-64z" fill="url(#gold)"/>
+  <path d="M226 278h60l-8-54h-44z" fill="#fff3bd" stroke="#f8bd3f" stroke-width="8"/>
+  <circle cx="256" cy="128" r="20" fill="#fff3bd"/>
+</svg>

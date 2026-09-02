@@ -1,0 +1,25 @@
+name = "spring-banquet-lucky-maze"
+main = "src/index.js"
+compatibility_date = "2026-09-02"
+compatibility_flags = ["nodejs_compat"]
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+run_worker_first = ["/api/*", "/ws/*"]
+
+[[durable_objects.bindings]]
+name = "ROOMS"
+class_name = "SpringRoom"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["SpringRoom"]
+
+[observability]
+enabled = true
+
+[vars]
+APP_VERSION = "1.0.0"
+BUILD_SHA = "local"

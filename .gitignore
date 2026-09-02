@@ -1,0 +1,8 @@
+node_modules/
+.wrangler/
+.dev.vars
+.admin-credentials
+.agent-run/
+final_runs/
+.DS_Store
+npm-debug.log*

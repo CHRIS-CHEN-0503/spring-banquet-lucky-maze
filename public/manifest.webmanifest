@@ -1,0 +1,19 @@
+{
+  "name": "春酒尋籤迷宮",
+  "short_name": "尋籤迷宮",
+  "description": "公司春酒專用的多人 3D 尋籤抽獎遊戲",
+  "lang": "zh-Hant",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#16070c",
+  "theme_color": "#7d121c",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

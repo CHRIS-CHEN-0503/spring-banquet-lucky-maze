@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#590d16">
+  <meta name="color-scheme" content="dark">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="春酒尋籤">
+  <meta name="description" content="春酒限定的多人 3D 尋籤迷宮與現場抽獎遊戲。">
+  <title>春酒尋籤迷宮</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23590d16'/%3E%3Ccircle cx='32' cy='32' r='23' fill='%23ffd36d'/%3E%3Ctext x='32' y='43' font-size='31' text-anchor='middle' fill='%23590d16'%3E%E7%B1%A4%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#app-main">跳到主要內容</a>
+
+  <main id="app-main" class="app-shell">
+    <section id="home-screen" class="screen screen--home is-active" aria-labelledby="home-title">
+      <div class="home-scrim" aria-hidden="true"></div>
+      <div class="lantern lantern--left" aria-hidden="true"><span></span></div>
+      <div class="lantern lantern--right" aria-hidden="true"><span></span></div>
+
+      <div class="home-layout page-frame">
+        <header class="hero-copy">
+          <div class="brand-seal" aria-hidden="true">
+            <svg viewBox="0 0 64 64" role="img">
+              <path d="M15 8h34v48H15z" fill="none" stroke="currentColor" stroke-width="3"/>
+              <path d="M22 16h20M22 48h20M23 23h18v18H23z" fill="none" stroke="currentColor" stroke-width="2"/>
+              <path d="M28 23v18M36 23v18M23 32h18" fill="none" stroke="currentColor" stroke-width="2"/>
+            </svg>
+          </div>
+          <p class="eyebrow">年度春酒限定尋寶</p>
+          <h1 id="home-title"><span>春酒</span>尋籤迷宮</h1>
+          <p class="hero-lead">走進喜氣迷宮，找到屬於你的幸運籤。</p>
+          <div class="room-summary" aria-label="房間狀態">
+            <span class="status-dot" aria-hidden="true"></span>
+            <span>活動房間</span>
+            <strong id="home-room-id">spring-party</strong>
+            <span class="summary-divider" aria-hidden="true"></span>
+            <span id="home-room-status">等待入場</span>
+          </div>
+        </header>
+
+        <nav class="entry-panel" aria-label="選擇進入方式">
+          <p class="entry-kicker">選擇進入方式</p>
+          <button id="enter-participant" class="entry-card entry-card--primary" type="button">
+            <span class="entry-icon" aria-hidden="true">
+              <svg viewBox="0 0 48 48"><path d="M10 39c1-8 6-12 14-12s13 4 14 12"/><circle cx="24" cy="17" r="8"/><path d="M36 10v10M31 15h10"/></svg>
+            </span>
+            <span class="entry-text"><strong>參加尋籤</strong><small>建立角色，進入 3D 迷宮</small></span>
+            <span class="entry-arrow" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg>
+            </span>
+          </button>
+          <button id="enter-admin" class="entry-card" type="button">
+            <span class="entry-icon" aria-hidden="true">
+              <svg viewBox="0 0 48 48"><path d="M9 39h30M13 34V19h22v15M18 19v-6h12v6M19 27h10M19 32h7"/></svg>
+            </span>
+            <span class="entry-text"><strong>主辦控制台</strong><small>設定獎項、鎖籤與抽獎</small></span>
+            <span class="entry-arrow" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg>
+            </span>
+          </button>
+          <button id="enter-display" class="entry-card" type="button">
+            <span class="entry-icon" aria-hidden="true">
+              <svg viewBox="0 0 48 48"><rect x="7" y="9" width="34" height="25" rx="3"/><path d="M18 41h12M24 34v7M13 16h22M13 22h14"/></svg>
+            </span>
+            <span class="entry-text"><strong>開啟大螢幕</strong><small>投影即時中獎結果</small></span>
+            <span class="entry-arrow" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg>
+            </span>
+          </button>
+          <p class="entry-note">建議使用手機橫向操作；大螢幕請使用全螢幕模式。</p>
+        </nav>
+      </div>
+    </section>
+
+    <section id="participant-screen" class="screen screen--panel" aria-labelledby="participant-title" aria-hidden="true">
+      <div class="panel-backdrop" aria-hidden="true"></div>
+      <header class="top-nav page-frame">
+        <button id="participant-back" class="icon-button" type="button" aria-label="返回首頁" data-back-home>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>
+        </button>
+        <div class="top-nav__title">
+          <span class="step-chip">入場設定</span>
+          <h2 id="participant-title">建立你的尋籤角色</h2>
+        </div>
+        <div class="connection-pill" aria-label="連線狀態"><span></span><b>活動連線</b></div>
+      </header>
+
+      <form id="participant-form" class="participant-layout page-frame" autocomplete="on">
+        <fieldset class="character-panel glass-panel">
+          <legend><span>01</span> 選擇職業</legend>
+          <div class="character-grid">
+            <label class="character-card">
+              <input type="radio" name="character" value="yong" checked>
+              <span class="role-icon role-icon--runner" aria-hidden="true">
+                <svg viewBox="0 0 48 48"><circle cx="29" cy="10" r="5"/><path d="m27 17-8 9 8 5 7 10M28 18l9 7M20 26l-9 5M7 17h12M5 23h9"/></svg>
+              </span>
+              <span class="character-name">疾風跑者</span>
+              <small class="character-skill">移動速度提升 12%</small>
+            </label>
+            <label class="character-card">
+              <input type="radio" name="character" value="hua">
+              <span class="role-icon role-icon--gourmet" aria-hidden="true">
+                <svg viewBox="0 0 48 48"><path d="M8 25h32c-1 10-7 15-16 15S9 35 8 25Z"/><path d="M15 20c0-5 4-9 9-9s9 4 9 9M24 8V4M15 9l-3-3M33 9l3-3M18 40h12"/></svg>
+              </span>
+              <span class="character-name">美食家</span>
+              <small class="character-skill">食物回復效果 1.5 倍</small>
+            </label>
+            <label class="character-card">
+              <input type="radio" name="character" value="dan">
+              <span class="role-icon role-icon--stamina" aria-hidden="true">
+                <svg viewBox="0 0 48 48"><path d="M24 5 40 11v11c0 11-6 17-16 21C14 39 8 33 8 22V11l16-6Z"/><path d="m16 24 5 5 11-12"/></svg>
+              </span>
+              <span class="character-name">耐力王</span>
+              <small class="character-skill">飽足感消耗減少 35%</small>
+            </label>
+            <label class="character-card">
+              <input type="radio" name="character" value="liya">
+              <span class="role-icon role-icon--mage" aria-hidden="true">
+                <svg viewBox="0 0 48 48"><path d="m11 38 21-21M29 9l3 8 8 3-8 3-3 8-3-8-8-3 8-3 3-8ZM9 8l2 4 4 2-4 2-2 4-2-4-4-2 4-2 2-4Z"/></svg>
+              </span>
+              <span class="character-name">小魔法師</span>
+              <small class="character-skill">限時道具延長至 1.5 倍</small>
+            </label>
+            <label class="character-card">
+              <input type="radio" name="character" value="robot">
+              <span class="role-icon role-icon--engineer" aria-hidden="true">
+                <svg viewBox="0 0 48 48"><path d="M16 7h16l3 7 7 3v14l-7 3-3 7H16l-3-7-7-3V17l7-3 3-7Z"/><circle cx="24" cy="24" r="8"/><path d="M24 19v10M19 24h10"/></svg>
+              </span>
+              <span class="character-name">工程師</span>
+              <small class="character-skill">自帶鐵鍬，每 45 秒補充</small>
+            </label>
+            <label class="character-card">
+              <input type="radio" name="character" value="cat">
+              <span class="role-icon role-icon--cat" aria-hidden="true">
+                <svg viewBox="0 0 48 48"><path d="m10 17 2-10 9 6h6l9-6 2 10v10c0 9-6 15-14 15S10 36 10 27V17Z"/><path d="M18 24h.01M30 24h.01M20 31c3 2 5 2 8 0M7 28l9 2M41 28l-9 2"/></svg>
+              </span>
+              <span class="character-name">尋路貓</span>
+              <small class="character-skill">降牆時顯示出口路線 6 秒</small>
+            </label>
+          </div>
+        </fieldset>
+
+        <div class="identity-panel glass-panel">
+          <div class="section-heading">
+            <span>02</span>
+            <div><h3>填寫參加資料</h3><p>中獎時將顯示姓名，請正確填寫。</p></div>
+          </div>
+          <div class="field-grid">
+            <label class="field-label" for="player-name">姓名</label>
+            <div class="input-shell">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-5 3-8 8-8s8 3 8 8"/></svg>
+              <input id="player-name" name="playerName" type="text" maxlength="24" autocomplete="name" placeholder="請輸入姓名" required>
+            </div>
+            <label class="field-label" for="employee-id">員工編號</label>
+            <div class="input-shell">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M8 10h8M8 14h5"/></svg>
+              <input id="employee-id" name="employeeId" type="text" maxlength="20" autocomplete="username" autocapitalize="characters" spellcheck="false" placeholder="請輸入員工編號" required>
+            </div>
+          </div>
+          <div class="join-summary">
+            <span class="mini-seal" aria-hidden="true">籤</span>
+            <p><strong>每人限持一支籤</strong><small>拾取後才會揭曉籤號；不滿意可放棄重找。</small></p>
+          </div>
+          <button id="join-room" class="primary-button" type="submit">
+            <span>進入春酒迷宮</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <section id="game-screen" class="screen screen--game" aria-label="春酒尋籤 3D 迷宮" aria-hidden="true">
+      <canvas id="game-canvas" aria-label="3D 迷宮遊戲畫面"></canvas>
+      <div id="look-zone" class="look-zone" aria-label="滑動此區域轉動視角"></div>
+
+      <header class="game-hud" aria-label="遊戲狀態">
+        <div class="hud-brand"><span aria-hidden="true">籤</span><strong>春酒尋籤</strong></div>
+        <div class="hud-stat"><span class="hud-label">房間</span><strong id="game-room-id">spring-party</strong></div>
+        <div class="hud-stat"><span class="hud-label">在線</span><strong><span id="room-player-count">1</span> 人</strong></div>
+        <div id="connection-status" class="hud-status"><i aria-hidden="true"></i><span>連線中</span></div>
+      </header>
+
+      <section class="event-hud" aria-label="迷宮事件">
+        <div id="wall-event-status" class="event-pill">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM4 10h16M9 5v5M15 10v4M4 14h16M10 14v5"/></svg>
+          <span>降牆倒數</span>
+          <strong id="wall-countdown">02:00</strong>
+        </div>
+        <div id="exit-hint" class="event-pill event-pill--exit" role="status" aria-live="polite">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V5h10v16M9 13h.01M15 12h5M17 9l3 3-3 3"/></svg>
+          <span>找到籤後前往舞台出口</span>
+        </div>
+      </section>
+
+      <aside class="ticket-hud" aria-labelledby="ticket-hud-title">
+        <span class="ticket-emblem" aria-hidden="true">籤</span>
+        <div>
+          <small id="ticket-hud-title">我的幸運籤 <span id="ticket-status">尚未尋籤</span></small>
+          <strong id="held-ticket">尚未取得</strong>
+        </div>
+        <button id="drop-ticket-button" class="text-button" type="button" disabled>放棄</button>
+      </aside>
+
+      <aside class="vitals-hud" aria-label="角色狀態">
+        <div class="satiety-stat">
+          <span class="vital-icon vital-icon--bowl" aria-hidden="true"><i></i></span>
+          <div class="vital-copy">
+            <span><b>飽足感</b><strong id="satiety-value">100%</strong></span>
+            <div class="vital-track" role="progressbar" aria-label="飽足感" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><i id="satiety-bar"></i></div>
+          </div>
+        </div>
+        <div class="joy-stat">
+          <span class="vital-icon vital-icon--spark" aria-hidden="true"><i></i></span>
+          <span><small>歡樂分</small><strong id="joy-score">0</strong></span>
+        </div>
+      </aside>
+
+      <div class="minimap-shell">
+        <div class="minimap-title"><span>宴會迷宮</span><small id="nearby-count">附近 0 人</small></div>
+        <canvas id="minimap-canvas" width="184" height="126" aria-label="迷你地圖"></canvas>
+      </div>
+
+      <aside id="active-item-status" class="active-item-status" aria-live="polite">
+        <span class="active-item-glyph" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M9 3h6v4l3 4v9H6v-9l3-4V3ZM8 13h8"/></svg>
+        </span>
+        <div><small>目前效果</small><strong id="active-item-name">無</strong></div>
+        <time id="active-item-timer" datetime="PT0S">--:--</time>
+        <i class="active-item-track" aria-hidden="true"><span id="active-item-bar"></span></i>
+      </aside>
+
+      <section id="inventory-panel" class="inventory-panel" aria-labelledby="inventory-title" hidden>
+        <header><div><small>隨身道具</small><h2 id="inventory-title">選擇要使用的道具</h2></div><button id="inventory-close" type="button" aria-label="關閉道具欄">關閉</button></header>
+        <div id="inventory-list" class="inventory-list" role="list">
+          <p id="inventory-empty" class="inventory-empty">目前沒有道具，探索迷宮即可取得。</p>
+        </div>
+      </section>
+
+      <div id="joystick-zone" class="joystick-zone" aria-label="移動搖桿">
+        <div class="joystick-guides" aria-hidden="true"><i></i><i></i></div>
+        <div id="joystick-knob" class="joystick-knob" aria-hidden="true"></div>
+        <span class="joystick-label">移動</span>
+      </div>
+
+      <div class="action-rail" aria-label="遊戲操作">
+        <button id="action-button" class="game-action game-action--primary" type="button">
+          <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M12 39h24l-2-22H14l-2 22Z"/><path d="M18 17a6 6 0 0 1 12 0M18 28h12M24 22v12"/></svg>
+          <span id="action-label">尋找籤台</span>
+        </button>
+        <button id="shovel-button" class="game-action game-action--tool" type="button" disabled>
+          <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M28 7c6 0 9 3 9 9l-8 2-4-4 3-7ZM27 17 12 34M8 33l7-3 4 4-3 7c-6 0-9-3-8-8Z"/></svg>
+          <span>鐵鍬</span><b id="shovel-count" class="action-badge">0</b>
+        </button>
+        <button id="skill-button" class="game-action game-action--tool" type="button">
+          <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 5 29 18l14 1-11 9 4 14-12-8-12 8 4-14-11-9 14-1 5-13Z"/></svg>
+          <span>職業技能</span><b id="skill-cooldown" class="action-caption">就緒</b>
+        </button>
+        <button id="inventory-button" class="game-action game-action--tool" type="button" aria-expanded="false" aria-controls="inventory-panel">
+          <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 15h32v25H8zM14 15V9h20v6M8 23h32M20 23v6h8v-6"/></svg>
+          <span>道具欄</span><b id="inventory-count" class="action-badge">0</b>
+        </button>
+        <button id="view-button" class="game-action" type="button" aria-label="切換遊戲視角">
+          <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M5 24s7-11 19-11 19 11 19 11-7 11-19 11S5 24 5 24Z"/><circle cx="24" cy="24" r="5"/></svg>
+          <span id="view-label">第三人稱</span>
+        </button>
+        <button id="leave-button" class="game-action game-action--quiet" type="button">
+          <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M21 9H9v30h12M30 15l9 9-9 9M16 24h23"/></svg>
+          <span>離開</span>
+        </button>
+      </div>
+
+      <div id="game-announcement" class="game-announcement" role="status" aria-live="assertive" aria-atomic="true"></div>
+      <div class="game-tip" aria-hidden="true"><span></span>右側滑動可轉向</div>
+
+      <section id="finish-overlay" class="finish-overlay" aria-labelledby="finish-title" aria-hidden="true" hidden>
+        <div class="finish-card">
+          <div class="finish-seal" aria-hidden="true"><span>到</span></div>
+          <p class="finish-overline">已抵達春酒舞台</p>
+          <h2 id="finish-title">恭喜完成尋籤迷宮</h2>
+          <div class="finish-rank"><span>你的名次</span><strong>第 <b id="finish-rank">—</b> 名</strong></div>
+          <div class="finish-room-progress">
+            <span><b>全場進度</b><strong><span id="finish-count">0</span>／<span id="finish-total">0</span> 人完成</strong></span>
+            <div class="finish-progress-track" role="progressbar" aria-label="全場完成進度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="finish-progress-bar"></i></div>
+          </div>
+          <p id="finish-wait-message" class="finish-wait-message">請保留你的幸運籤，正在等待其他參加者完成。</p>
+        </div>
+      </section>
+    </section>
+
+    <section id="admin-screen" class="screen screen--panel screen--admin" aria-labelledby="admin-title" aria-hidden="true">
+      <div class="panel-backdrop" aria-hidden="true"></div>
+      <header class="top-nav page-frame">
+        <button id="admin-back" class="icon-button" type="button" aria-label="返回首頁" data-back-home>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>
+        </button>
+        <div class="top-nav__title">
+          <span class="step-chip">活動管理</span>
+          <h2 id="admin-title">春酒主辦控制台</h2>
+        </div>
+        <div id="admin-connection-status" class="connection-pill"><span></span><b>尚未登入</b></div>
+      </header>
+
+      <div class="admin-body page-frame">
+        <form id="admin-login-form" class="admin-login glass-panel" autocomplete="off">
+          <div class="admin-lockmark" aria-hidden="true">
+            <svg viewBox="0 0 48 48"><rect x="9" y="21" width="30" height="21" rx="4"/><path d="M16 21v-6a8 8 0 0 1 16 0v6M24 29v6"/></svg>
+          </div>
+          <div><h3>主辦人驗證</h3><p>輸入活動管理碼後，才可鎖籤與抽獎。</p></div>
+          <label class="sr-only" for="admin-pin">主辦人管理碼</label>
+          <div class="input-shell input-shell--pin">
+            <input id="admin-pin" name="adminPin" type="password" inputmode="numeric" maxlength="16" autocomplete="one-time-code" placeholder="輸入管理碼" required>
+          </div>
+          <button id="admin-login" class="primary-button" type="submit">進入控制台</button>
+        </form>
+
+        <div id="admin-dashboard" class="admin-dashboard" hidden>
+          <section class="admin-stats" aria-label="活動即時統計">
+            <article><span>參加人數</span><strong id="admin-player-count">0</strong><small>人</small></article>
+            <article><span>已持籤</span><strong id="admin-held-count">0</strong><small>支</small></article>
+            <article><span>可用籤</span><strong id="admin-available-count">80</strong><small>支</small></article>
+            <article class="phase-stat"><span>尋籤階段</span><strong id="admin-phase">開放中</strong></article>
+          </section>
+
+          <div class="admin-grid">
+            <section class="admin-card prize-card" aria-labelledby="prize-heading">
+              <div class="card-heading"><div><span>獎項設定</span><h3 id="prize-heading">建立本次獎項</h3></div><small id="prize-total">共 0 個名額</small></div>
+              <form id="prize-form" class="prize-form">
+                <label><span>獎項名稱</span><input id="prize-name" type="text" maxlength="30" placeholder="例如：頭獎" required></label>
+                <label><span>名額</span><input id="prize-quantity" type="number" min="1" max="50" value="1" required></label>
+                <button id="add-prize" class="secondary-button" type="submit">加入獎項</button>
+              </form>
+              <div id="prize-list" class="prize-list" role="list" aria-label="獎項清單">
+                <p class="empty-state">尚未建立獎項</p>
+              </div>
+            </section>
+
+            <section class="admin-card draw-card" aria-labelledby="draw-heading">
+              <div class="card-heading"><div><span>抽獎控制</span><h3 id="draw-heading">鎖籤後開始抽獎</h3></div><span id="lock-state" class="state-badge state-badge--open">開放尋籤</span></div>
+              <div class="phase-actions">
+                <button id="lock-tickets" class="secondary-button" type="button">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+                  鎖定尋籤
+                </button>
+                <button id="unlock-tickets" class="ghost-button" type="button" disabled>
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M16 10V7a4 4 0 0 0-8 0"/></svg>
+                  重新開放
+                </button>
+              </div>
+              <label class="select-label" for="prize-select">本輪抽出獎項</label>
+              <select id="prize-select" aria-describedby="draw-help"><option value="">請先建立獎項</option></select>
+              <p id="draw-help" class="draw-help">只會從仍持有籤、且尚未中獎的人員中抽出。</p>
+              <button id="draw-prize" class="draw-button" type="button" disabled>
+                <span class="draw-seal" aria-hidden="true">抽</span>
+                <span><strong>開始抽獎</strong><small>結果將同步至大螢幕</small></span>
+              </button>
+            </section>
+
+            <section class="admin-card records-card" aria-labelledby="records-heading">
+              <div class="card-heading"><div><span>領獎紀錄</span><h3 id="records-heading">本次中獎名單</h3></div><small id="draw-count">已抽出 0 人</small></div>
+              <div class="record-table" role="region" aria-label="中獎與領獎狀態" tabindex="0">
+                <div class="record-head"><span>獎項</span><span>籤號</span><span>中獎人</span><span>狀態</span></div>
+                <div id="draw-records" class="record-body">
+                  <p class="empty-state">抽獎結果會顯示在這裡</p>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <footer class="admin-footer">
+            <p>重設後會清空所有籤號與中獎紀錄，且無法復原。</p>
+            <button id="reset-room" class="danger-button" type="button">重設活動房間</button>
+          </footer>
+        </div>
+      </div>
+    </section>
+
+    <section id="display-screen" class="screen screen--display" aria-labelledby="display-title" aria-hidden="true">
+      <div class="display-rays" aria-hidden="true"></div>
+      <div class="display-confetti" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <header class="display-header">
+        <div class="display-brand"><span aria-hidden="true">籤</span><div><small>春酒歡樂抽獎</small><h2 id="display-title">幸運得主</h2></div></div>
+        <div id="display-connection-status" class="connection-pill"><span></span><b>等待連線</b></div>
+        <button id="display-back" class="icon-button" type="button" aria-label="離開大螢幕並返回首頁" data-back-home>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6h12v12H6zM9 9l6 6M15 9l-6 6"/></svg>
+        </button>
+      </header>
+
+      <div id="display-stage" class="display-stage" aria-live="assertive" aria-atomic="true">
+        <p class="display-overline">本輪獎項</p>
+        <h3 id="display-prize-name">等待主辦人開始抽獎</h3>
+        <div class="winning-ticket" aria-label="中獎籤號">
+          <span>幸運籤號</span>
+          <strong id="display-number">— — —</strong>
+        </div>
+        <p id="display-winner-name" class="winner-name">請各位勇者準備好手中的幸運籤</p>
+        <p id="display-result-status" class="result-status">尋籤活動進行中</p>
+      </div>
+
+      <footer class="display-footer">
+        <span>春酒尋籤迷宮</span>
+        <div class="display-progress"><i id="display-progress-bar"></i></div>
+        <span id="display-draw-summary">尚未開獎</span>
+      </footer>
+    </section>
+  </main>
+
+  <div id="rotate-overlay" class="rotate-overlay" role="dialog" aria-modal="true" aria-labelledby="rotate-title" aria-describedby="rotate-description">
+    <div class="rotate-card">
+      <div class="phone-rotate" aria-hidden="true"><span></span></div>
+      <h2 id="rotate-title">請將手機轉為橫向</h2>
+      <p id="rotate-description">橫向畫面能完整顯示迷宮與操作按鈕，轉向後會接續目前進度。</p>
+    </div>
+  </div>
+
+  <div id="toast-region" class="toast-region" aria-live="polite" aria-atomic="true"></div>
+
+  <dialog id="leave-dialog" class="confirm-dialog" aria-labelledby="leave-dialog-title" aria-describedby="leave-dialog-description">
+    <form method="dialog">
+      <div class="dialog-icon" aria-hidden="true">
+        <svg viewBox="0 0 48 48"><path d="M24 6 5 40h38L24 6Z"/><path d="M24 18v11M24 35h.01"/></svg>
+      </div>
+      <div class="dialog-copy">
+        <h2 id="leave-dialog-title">確定要離開迷宮？</h2>
+        <p id="leave-dialog-description">離開後將釋放目前持有的籤，回到首頁。</p>
+      </div>
+      <div class="dialog-actions">
+        <button id="cancel-leave" class="ghost-button" value="cancel">繼續尋籤</button>
+        <button id="confirm-leave" class="danger-button" value="confirm">確定離開</button>
+      </div>
+    </form>
+  </dialog>
+
+  <template id="prize-item-template">
+    <div class="prize-item" role="listitem"><span class="prize-medal" aria-hidden="true"></span><strong></strong><small></small><button type="button" aria-label="刪除此獎項">移除</button></div>
+  </template>
+
+  <script src="./lib/three.min.js"></script>
+  <script src="./app.js" type="module"></script>
+</body>
+</html>
