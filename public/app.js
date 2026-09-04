@@ -1356,46 +1356,150 @@
     return { points: points, velocities: velocities, age: 99, origin: new THREE.Vector3() };
   }
 
-  function createAvatar(character, local) {
-    var group = new THREE.Group();
-    var palette = characterPalette(character);
-    var body = new THREE.Mesh(new THREE.CapsuleGeometry(0.34, 0.58, 4, 8), new THREE.MeshStandardMaterial({ color: palette.body, roughness: 0.55 }));
-    body.position.y = 0.78;
-    group.add(body);
-    var head = new THREE.Mesh(new THREE.SphereGeometry(0.3, 10, 8), new THREE.MeshStandardMaterial({ color: palette.head, roughness: 0.5 }));
-    head.position.y = 1.47;
-    group.add(head);
-    var crown = new THREE.Mesh(new THREE.ConeGeometry(0.22, 0.34, 6), new THREE.MeshStandardMaterial({ color: 0xffcc43, metalness: 0.55, roughness: 0.3 }));
-    crown.position.y = 1.82;
-    group.add(crown);
-    group.userData.isAvatar = true;
-    group.userData.local = local;
-    return group;
+  var avatarGeometryCache = {};
+  var avatarMaterialCache = {};
+
+  function avatarAppearance(character) {
+    var appearances = {
+      yong: { type: 'human', outfit: 'suit', skin: 0xffcc99, hair: 0x4a3220, accent: 0x2196f3 },
+      hua: { type: 'girl', outfit: 'dress', skin: 0xffd9b3, hair: 0x8d5524, accent: 0xf06292 },
+      dan: { type: 'human', outfit: 'suit', skin: 0x8d5524, hair: 0x1a1a1a, accent: 0x43a047 },
+      liya: { type: 'girl', outfit: 'dress', skin: 0xc68642, hair: 0x111111, accent: 0x7e57c2 },
+      robot: { type: 'robot', outfit: 'suit', skin: 0xb0bec5, hair: 0x616161, accent: 0x00e5ff },
+      cat: { type: 'cat', outfit: 'dress', skin: 0xffa040, hair: 0xef6c00, accent: 0xffb74d }
+    };
+    return appearances[character] || appearances.yong;
   }
 
-  function characterPalette(character) {
-    var palettes = {
-      'lion-red': { body: 0xc92931, head: 0xffd067 },
-      'lion-gold': { body: 0xe89a22, head: 0xffe29a },
-      'lantern-hero': { body: 0x9e1530, head: 0xffb05a },
-      'firework-hero': { body: 0x4b236f, head: 0xffd5a8 },
-      lion: { body: 0xc92931, head: 0xffd067 },
-      lantern: { body: 0x9e1530, head: 0xffb05a },
-      drummer: { body: 0x4b236f, head: 0xffd5a8 },
-      fortune: { body: 0xe89a22, head: 0xffe29a },
-      yong: { body: 0x1683a0, head: 0xf2bf82 },
-      hua: { body: 0xdf497f, head: 0xf7c79c },
-      dan: { body: 0xeb9b2c, head: 0xeab985 },
-      liya: { body: 0x8655c8, head: 0xf5c69c },
-      robot: { body: 0x6989a4, head: 0xcfe5ee },
-      cat: { body: 0xdb7432, head: 0xffca73 }
-    };
-    return palettes[character] || palettes['lion-red'];
+  function avatarGeometry(kind) {
+    if (avatarGeometryCache[kind]) return avatarGeometryCache[kind];
+    var geometry;
+    if (kind === 'torso') geometry = new THREE.BoxGeometry(0.62, 0.62, 0.36);
+    else if (kind === 'dress-bodice') geometry = new THREE.BoxGeometry(0.52, 0.48, 0.34);
+    else if (kind === 'skirt') geometry = new THREE.CylinderGeometry(0.28, 0.45, 0.5, 8);
+    else if (kind === 'sash') geometry = new THREE.CylinderGeometry(0.30, 0.32, 0.09, 8);
+    else if (kind === 'head') geometry = new THREE.BoxGeometry(0.52, 0.5, 0.48);
+    else if (kind === 'eye') geometry = new THREE.BoxGeometry(0.07, 0.09, 0.04);
+    else if (kind === 'hair') geometry = new THREE.BoxGeometry(0.56, 0.16, 0.52);
+    else if (kind === 'pigtail') geometry = new THREE.BoxGeometry(0.14, 0.4, 0.14);
+    else if (kind === 'arm') geometry = new THREE.BoxGeometry(0.16, 0.5, 0.16);
+    else if (kind === 'hand') geometry = new THREE.BoxGeometry(0.13, 0.13, 0.13);
+    else if (kind === 'leg') geometry = new THREE.BoxGeometry(0.2, 0.55, 0.2);
+    else if (kind === 'shirt') geometry = new THREE.BoxGeometry(0.18, 0.43, 0.025);
+    else if (kind === 'collar') geometry = new THREE.BoxGeometry(0.25, 0.08, 0.025);
+    else if (kind === 'tie') geometry = new THREE.BoxGeometry(0.055, 0.27, 0.03);
+    else if (kind === 'lapel') geometry = new THREE.BoxGeometry(0.13, 0.34, 0.025);
+    else if (kind === 'ear') geometry = new THREE.ConeGeometry(0.11, 0.22, 4);
+    else if (kind === 'tail') geometry = new THREE.BoxGeometry(0.09, 0.09, 0.5);
+    else if (kind === 'nose') geometry = new THREE.BoxGeometry(0.08, 0.06, 0.05);
+    else if (kind === 'antenna') geometry = new THREE.BoxGeometry(0.05, 0.3, 0.05);
+    else if (kind === 'bulb') geometry = new THREE.SphereGeometry(0.08, 8, 8);
+    else geometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
+    avatarGeometryCache[kind] = geometry;
+    return geometry;
+  }
+
+  function avatarMaterial(color, glow) {
+    var key = String(color) + (glow ? '-glow' : '');
+    if (!avatarMaterialCache[key]) {
+      avatarMaterialCache[key] = new THREE.MeshStandardMaterial({
+        color: color,
+        emissive: glow ? color : 0x000000,
+        emissiveIntensity: glow ? 0.7 : 0,
+        roughness: glow ? 0.3 : 0.64,
+        metalness: glow ? 0.2 : 0.04
+      });
+    }
+    return avatarMaterialCache[key];
+  }
+
+  function addAvatarPart(group, kind, color, x, y, z, rotationZ, glow) {
+    var mesh = new THREE.Mesh(avatarGeometry(kind), avatarMaterial(color, glow));
+    mesh.position.set(x, y, z);
+    if (rotationZ) mesh.rotation.z = rotationZ;
+    group.add(mesh);
+    return mesh;
+  }
+
+  function createAvatar(character, local) {
+    var group = new THREE.Group();
+    var appearance = avatarAppearance(character);
+    var isDress = appearance.outfit === 'dress';
+    var suitColor = appearance.type === 'robot' ? 0x526779 : 0x3f5878;
+    var white = 0xfffbf0;
+    var legColor = isDress ? appearance.skin : 0x101620;
+
+    var legL = addAvatarPart(group, 'leg', legColor, -0.16, 0.31, 0);
+    var legR = addAvatarPart(group, 'leg', legColor, 0.16, 0.31, 0);
+    var armL;
+    var armR;
+    var body;
+
+    if (isDress) {
+      addAvatarPart(group, 'skirt', white, 0, 0.58, 0);
+      addAvatarPart(group, 'sash', appearance.accent, 0, 0.79, 0);
+      body = addAvatarPart(group, 'dress-bodice', white, 0, 0.98, 0);
+      armL = addAvatarPart(group, 'arm', white, -0.38, 1.0, 0);
+      armR = addAvatarPart(group, 'arm', white, 0.38, 1.0, 0);
+      addAvatarPart(group, 'hand', appearance.skin, -0.38, 0.73, 0);
+      addAvatarPart(group, 'hand', appearance.skin, 0.38, 0.73, 0);
+    } else {
+      body = addAvatarPart(group, 'torso', suitColor, 0, 0.96, 0);
+      addAvatarPart(group, 'shirt', white, 0, 1.0, 0.193);
+      addAvatarPart(group, 'collar', white, 0, 1.2, -0.193);
+      addAvatarPart(group, 'tie', appearance.accent, 0, 0.97, 0.211);
+      addAvatarPart(group, 'lapel', 0x0b101a, -0.12, 1.04, 0.207, -0.18);
+      addAvatarPart(group, 'lapel', 0x0b101a, 0.12, 1.04, 0.207, 0.18);
+      armL = addAvatarPart(group, 'arm', suitColor, -0.42, 1.04, 0);
+      armR = addAvatarPart(group, 'arm', suitColor, 0.42, 1.04, 0);
+      addAvatarPart(group, 'hand', appearance.skin, -0.42, 0.76, 0);
+      addAvatarPart(group, 'hand', appearance.skin, 0.42, 0.76, 0);
+    }
+
+    addAvatarPart(group, 'head', appearance.skin, 0, 1.55, 0);
+    if (appearance.type === 'robot') {
+      addAvatarPart(group, 'eye', appearance.accent, -0.13, 1.58, 0.26, 0, true);
+      addAvatarPart(group, 'eye', appearance.accent, 0.13, 1.58, 0.26, 0, true);
+      addAvatarPart(group, 'antenna', appearance.hair, 0, 1.94, 0);
+      addAvatarPart(group, 'bulb', appearance.accent, 0, 2.12, 0, 0, true);
+    } else {
+      addAvatarPart(group, 'eye', 0x222222, -0.13, 1.58, 0.26);
+      addAvatarPart(group, 'eye', 0x222222, 0.13, 1.58, 0.26);
+      if (appearance.type === 'cat') {
+        addAvatarPart(group, 'ear', appearance.hair, -0.17, 1.9, 0);
+        addAvatarPart(group, 'ear', appearance.hair, 0.17, 1.9, 0);
+        var tail = addAvatarPart(group, 'tail', appearance.hair, 0, 0.82, -0.4);
+        tail.rotation.x = 0.6;
+        addAvatarPart(group, 'nose', 0xef9a9a, 0, 1.48, 0.26);
+      } else {
+        addAvatarPart(group, 'hair', appearance.hair, 0, 1.83, 0);
+        if (appearance.type === 'girl') {
+          addAvatarPart(group, 'pigtail', appearance.hair, -0.33, 1.55, -0.05);
+          addAvatarPart(group, 'pigtail', appearance.hair, 0.33, 1.55, -0.05);
+        }
+      }
+    }
+
+    group.userData.isAvatar = true;
+    group.userData.local = local;
+    group.userData.character = character;
+    group.userData.outfit = appearance.outfit;
+    group.userData.armL = armL;
+    group.userData.armR = armR;
+    group.userData.legL = legL;
+    group.userData.legR = legR;
+    group.userData.body = body;
+    return group;
   }
 
   function resetPlayerSystems(character) {
     if (!game) return;
     game.character = CLASS_DEFS[character] ? character : 'yong';
+    if (!game.localAvatar || game.localAvatar.userData.character !== game.character) {
+      if (game.localAvatar) game.scene.remove(game.localAvatar);
+      game.localAvatar = createAvatar(game.character, true);
+      game.scene.add(game.localAvatar);
+    }
     game.position.copy(game.maze.spawn);
     game.yaw = initialYawForMaze(game.maze);
     game.satiety = 100;

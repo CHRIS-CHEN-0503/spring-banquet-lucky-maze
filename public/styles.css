@@ -414,11 +414,25 @@ svg {
 }
 
 .role-icon svg { stroke-width: 2.1; }
-.role-icon--gourmet { color: #ffefb7; background: linear-gradient(145deg, #bf572d, #7f151f); }
-.role-icon--stamina { color: #fff0a8; background: linear-gradient(145deg, #94412d, #59101e); }
-.role-icon--mage { color: #ffe8b2; background: linear-gradient(145deg, #762f72, #531126); }
-.role-icon--engineer { color: #fff1bc; background: linear-gradient(145deg, #77604e, #531420); }
-.role-icon--cat { color: #fff0b5; background: linear-gradient(145deg, #b17a32, #681624); }
+.role-icon--runner { --portrait-skin: #ffcc99; --portrait-hair: #4a3220; --portrait-accent: #2196f3; }
+.role-icon--gourmet { --portrait-skin: #ffd9b3; --portrait-hair: #8d5524; --portrait-accent: #f06292; color: #ffefb7; background: linear-gradient(145deg, #bf572d, #7f151f); }
+.role-icon--stamina { --portrait-skin: #8d5524; --portrait-hair: #1a1a1a; --portrait-accent: #43a047; color: #fff0a8; background: linear-gradient(145deg, #94412d, #59101e); }
+.role-icon--mage { --portrait-skin: #c68642; --portrait-hair: #111111; --portrait-accent: #7e57c2; color: #ffe8b2; background: linear-gradient(145deg, #762f72, #531126); }
+.role-icon--engineer { --portrait-skin: #b0bec5; --portrait-hair: #616161; --portrait-accent: #00e5ff; color: #fff1bc; background: linear-gradient(145deg, #77604e, #531420); }
+.role-icon--cat { --portrait-skin: #ffa040; --portrait-hair: #ef6c00; --portrait-accent: #ffb74d; color: #fff0b5; background: linear-gradient(145deg, #b17a32, #681624); }
+.role-icon--portrait { padding: clamp(4px, .55vw, 6px); }
+.character-portrait,
+.character-portrait * { stroke: none; }
+.character-portrait .portrait-skin { fill: var(--portrait-skin); }
+.character-portrait .portrait-hair { fill: var(--portrait-hair); }
+.character-portrait .portrait-eye { fill: #171316; }
+.character-portrait .portrait-suit { fill: #172033; }
+.character-portrait .portrait-shirt,
+.character-portrait .portrait-dress { fill: #fffaf0; }
+.character-portrait .portrait-accent { fill: var(--portrait-accent); }
+.character-portrait .portrait-robot { fill: #b0bec5; }
+.character-portrait .portrait-antenna { fill: none; stroke: #7c8790; stroke-width: 2.2; }
+.character-portrait .portrait-nose { fill: #ef9a9a; }
 .character-name { font-size: clamp(13px, 1.45vw, 17px); font-weight: 900; white-space: nowrap; }
 .character-card .character-skill { min-height: 2.55em; display: grid; place-items: start center; color: var(--ink-muted); font-size: clamp(9px, 1.02vw, 11px); line-height: 1.28; text-align: center; text-wrap: balance; }
 
