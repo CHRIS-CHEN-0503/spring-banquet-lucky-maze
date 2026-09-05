@@ -66,6 +66,7 @@
   var lastDraw = null;
   var startedAt = 0;
   var game = null;
+  var gameControlEventsBound = false;
 
   function getRoomId() {
     var value = new URLSearchParams(window.location.search).get('room') || ROOM_FALLBACK;
@@ -912,9 +913,12 @@
       fireworks: fireworks,
       fireworkBurst: 0,
       position: new THREE.Vector3(maze.spawn.x, 0, maze.spawn.z),
-      yaw: spawnYaw,
+      heading: spawnYaw,
+      camYaw: spawnYaw + Math.PI,
+      camPitch: 0,
       viewMode: 1,
       input: { x: 0, y: 0 },
+      joystickActive: false,
       keys: new Set(),
       nearStation: null,
       nearExit: false,
@@ -1023,8 +1027,8 @@
   function cameraBackDistance(targetGame, maximum) {
     var safe = 0.65;
     for (var distance = 0.65; distance <= maximum; distance += 0.2) {
-      var x = targetGame.position.x - Math.sin(targetGame.yaw) * distance;
-      var z = targetGame.position.z - Math.cos(targetGame.yaw) * distance;
+      var x = targetGame.position.x + Math.sin(targetGame.camYaw) * distance;
+      var z = targetGame.position.z + Math.cos(targetGame.camYaw) * distance;
       if (pointCollidesWalls(x, z, targetGame.collisions, 0.14)) break;
       safe = distance;
     }
@@ -1034,12 +1038,12 @@
   function setInitialCamera(targetGame) {
     var distance = cameraBackDistance(targetGame, 4.4);
     targetGame.camera.position.set(
-      targetGame.position.x - Math.sin(targetGame.yaw) * distance,
+      targetGame.position.x + Math.sin(targetGame.camYaw) * distance,
       2.7,
-      targetGame.position.z - Math.cos(targetGame.yaw) * distance
+      targetGame.position.z + Math.cos(targetGame.camYaw) * distance
     );
     targetGame.camera.lookAt(new THREE.Vector3(targetGame.position.x, 1.35, targetGame.position.z));
-    targetGame.localAvatar.rotation.y = targetGame.yaw;
+    targetGame.localAvatar.rotation.y = targetGame.heading;
   }
 
   function buildMazeMeshes(scene, maze) {
@@ -1487,7 +1491,12 @@
       game.scene.add(game.localAvatar);
     }
     game.position.copy(game.maze.spawn);
-    game.yaw = initialYawForMaze(game.maze);
+    game.heading = initialYawForMaze(game.maze);
+    game.camYaw = game.heading + Math.PI;
+    game.camPitch = 0;
+    game.joystickActive = false;
+    game.input.x = 0;
+    game.input.y = 0;
     game.satiety = 100;
     game.joyScore = 0;
     game.inventory = {};
@@ -1651,17 +1660,25 @@
   }
 
   function bindGameControls() {
-    if (game.controlsBound) return;
-    game.controlsBound = true;
+    if (gameControlEventsBound) return;
+    gameControlEventsBound = true;
     window.addEventListener('keydown', function (event) {
       if (!game || route !== 'game') return;
       game.keys.add(event.code);
-      if (event.code === 'KeyE' || event.code === 'Space') { event.preventDefault(); useAction(); }
+      if (event.code === 'KeyQ') { event.preventDefault(); game.camYaw += 0.15; }
+      if (event.code === 'KeyE') { event.preventDefault(); game.camYaw -= 0.15; }
+      if (event.code === 'Space') { event.preventDefault(); useAction(); }
       if (event.code === 'KeyV') cycleView();
-      if (event.code === 'KeyQ') useShovel();
       if (event.code === 'KeyI') toggleInventory();
     });
     window.addEventListener('keyup', function (event) { if (game) game.keys.delete(event.code); });
+    window.addEventListener('blur', function () {
+      if (!game) return;
+      game.keys.clear();
+      game.input.x = 0;
+      game.input.y = 0;
+      game.joystickActive = false;
+    });
     bindJoystick();
     bindLookControls();
   }
@@ -1669,29 +1686,49 @@
   function bindJoystick() {
     if (!dom.joystick) return;
     var pointerId = null;
-    var knob = dom.joystick.querySelector('.joystick-knob, [data-joystick-knob]');
+    var originX = 0;
+    var originY = 0;
+    var base = document.getElementById('joystick-base');
+    var knob = document.getElementById('joystick-knob');
+    function place(baseX, baseY, knobX, knobY) {
+      if (base) { base.style.left = (baseX - 55) + 'px'; base.style.top = (baseY - 55) + 'px'; }
+      if (knob) { knob.style.left = (knobX - 26) + 'px'; knob.style.top = (knobY - 26) + 'px'; }
+    }
+    function start(event) {
+      if (!game) return;
+      pointerId = event.pointerId;
+      originX = event.clientX;
+      originY = event.clientY;
+      game.joystickActive = true;
+      game.input.x = 0;
+      game.input.y = 0;
+      if (base) base.style.display = 'block';
+      if (knob) knob.style.display = 'block';
+      place(originX, originY, originX, originY);
+      dom.joystick.setPointerCapture(pointerId);
+    }
     function update(event) {
-      var rect = dom.joystick.getBoundingClientRect();
-      var cx = rect.left + rect.width / 2;
-      var cy = rect.top + rect.height / 2;
-      var dx = event.clientX - cx;
-      var dy = event.clientY - cy;
-      var radius = Math.max(22, Math.min(rect.width, rect.height) * 0.36);
+      var dx = event.clientX - originX;
+      var dy = event.clientY - originY;
+      var radius = 52;
       var length = Math.hypot(dx, dy) || 1;
       if (length > radius) { dx = dx / length * radius; dy = dy / length * radius; }
       game.input.x = dx / radius;
       game.input.y = dy / radius;
-      if (knob) knob.style.transform = 'translate(calc(-50% + ' + dx.toFixed(1) + 'px),calc(-50% + ' + dy.toFixed(1) + 'px))';
+      place(originX, originY, originX + dx, originY + dy);
     }
     function reset() {
       pointerId = null;
-      if (game) { game.input.x = 0; game.input.y = 0; }
-      if (knob) knob.style.transform = 'translate(-50%,-50%)';
+      if (game) {
+        game.input.x = 0;
+        game.input.y = 0;
+        game.joystickActive = false;
+      }
+      if (base) base.style.display = 'none';
+      if (knob) knob.style.display = 'none';
     }
     dom.joystick.addEventListener('pointerdown', function (event) {
-      pointerId = event.pointerId;
-      dom.joystick.setPointerCapture(pointerId);
-      update(event);
+      start(event);
       event.preventDefault();
     });
     dom.joystick.addEventListener('pointermove', function (event) { if (event.pointerId === pointerId) update(event); });
@@ -1704,17 +1741,22 @@
     if (!target) return;
     var pointerId = null;
     var lastX = 0;
+    var lastY = 0;
     target.addEventListener('pointerdown', function (event) {
       pointerId = event.pointerId;
       lastX = event.clientX;
+      lastY = event.clientY;
       target.setPointerCapture(pointerId);
       event.preventDefault();
     });
     target.addEventListener('pointermove', function (event) {
       if (event.pointerId !== pointerId || !game) return;
       var dx = event.clientX - lastX;
+      var dy = event.clientY - lastY;
       lastX = event.clientX;
-      game.yaw -= dx * 0.008;
+      lastY = event.clientY;
+      game.camYaw -= dx * 0.008;
+      game.camPitch = Math.max(-0.6, Math.min(1, game.camPitch - dy * 0.004));
     });
     target.addEventListener('pointerup', function () { pointerId = null; });
     target.addEventListener('pointercancel', function () { pointerId = null; });
@@ -1722,7 +1764,8 @@
 
   function cycleView() {
     if (!game) return;
-    game.viewMode = (game.viewMode + 1) % 3;
+    var order = [1, 0, 2];
+    game.viewMode = order[(order.indexOf(game.viewMode) + 1) % order.length];
     var labels = ['第一人稱', '第三人稱', '俯視'];
     if (dom.viewLabel) dom.viewLabel.textContent = labels[game.viewMode];
     toast('切換為' + labels[game.viewMode], 'info', 1600);
@@ -1740,29 +1783,33 @@
   }
 
   function updateGame(delta, now) {
-    var forward = -game.input.y + (game.keys.has('KeyW') || game.keys.has('ArrowUp') ? 1 : 0) - (game.keys.has('KeyS') || game.keys.has('ArrowDown') ? 1 : 0);
-    var sideways = game.input.x + (game.keys.has('KeyD') || game.keys.has('ArrowRight') ? 1 : 0) - (game.keys.has('KeyA') || game.keys.has('ArrowLeft') ? 1 : 0);
-    var magnitude = Math.hypot(forward, sideways);
-    if (magnitude > 1) { forward /= magnitude; sideways /= magnitude; }
+    var inputX = game.input.x;
+    var inputY = game.input.y;
+    if (!game.joystickActive) {
+      inputX = (game.keys.has('KeyD') || game.keys.has('ArrowRight') ? 1 : 0) - (game.keys.has('KeyA') || game.keys.has('ArrowLeft') ? 1 : 0);
+      inputY = (game.keys.has('KeyS') || game.keys.has('ArrowDown') ? 1 : 0) - (game.keys.has('KeyW') || game.keys.has('ArrowUp') ? 1 : 0);
+    }
+    var magnitude = Math.min(1, Math.hypot(inputX, inputY));
     var speed = 4.35;
     if (game.character === 'yong') speed *= 1.12;
     if (game.satiety <= 0) speed *= 0.62;
     if (effectActive('speed', now)) speed *= 1.35;
     if (effectActive('superspeed', now)) speed *= 1.7;
     if (effectActive('timegem', now)) speed *= 1.45;
-    var sin = Math.sin(game.yaw);
-    var cos = Math.cos(game.yaw);
-    var dx = (sideways * cos + forward * sin) * speed * delta;
-    var dz = (sideways * -sin + forward * cos) * speed * delta;
     if (!game.finished) {
-      moveWithCollision(dx, dz);
+      if (magnitude > 0.08) {
+        var base = game.viewMode === 2 ? Math.PI : game.camYaw + Math.PI;
+        var angle = base + Math.atan2(-inputX, -inputY);
+        moveWithCollision(Math.sin(angle) * speed * magnitude * delta, Math.cos(angle) * speed * magnitude * delta);
+        game.heading = interpolateAngle(game.heading, angle, Math.min(1, delta * 12));
+      }
       if (magnitude > 0.08) {
         var drain = 0.22 * (game.character === 'dan' ? 0.65 : 1);
         game.satiety = Math.max(0, game.satiety - drain * delta);
       }
     }
     game.localAvatar.position.copy(game.position);
-    game.localAvatar.rotation.y = game.yaw;
+    game.localAvatar.rotation.y = game.heading;
     game.localAvatar.visible = game.viewMode !== 0;
     updateCamera(delta);
     updateStations(now);
@@ -1776,7 +1823,7 @@
     updateMinimap();
     updatePlayerHud(game);
     if (!game.finished && now - game.lastPositionSent >= POSITION_INTERVAL) {
-      if (socket && socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify({ type: 'position', x: round2(game.position.x), z: round2(game.position.z), yaw: round3(game.yaw) }));
+      if (socket && socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify({ type: 'position', x: round2(game.position.x), z: round2(game.position.z), yaw: round3(game.heading) }));
       game.lastPositionSent = now;
     }
   }
@@ -1798,10 +1845,14 @@
     var desired = new THREE.Vector3();
     if (game.viewMode === 0) {
       desired.set(game.position.x, 1.62, game.position.z);
-      target.add(new THREE.Vector3(Math.sin(game.yaw) * 6, 0.1, Math.cos(game.yaw) * 6));
+      target.set(
+        game.position.x + Math.sin(game.camYaw + Math.PI),
+        1.62 + game.camPitch * 3.2,
+        game.position.z + Math.cos(game.camYaw + Math.PI)
+      );
     } else if (game.viewMode === 1) {
       var distance = cameraBackDistance(game, 4.4);
-      desired.set(game.position.x - Math.sin(game.yaw) * distance, 2.7 + Math.min(0.35, distance * 0.08), game.position.z - Math.cos(game.yaw) * distance);
+      desired.set(game.position.x + Math.sin(game.camYaw) * distance, 2.7 + Math.min(0.35, distance * 0.08), game.position.z + Math.cos(game.camYaw) * distance);
     } else {
       desired.set(game.position.x, 24, game.position.z + 0.01);
       target.set(game.position.x, 0, game.position.z);
@@ -2091,7 +2142,7 @@
     var dx = exitPoint.x - game.position.x;
     var dz = exitPoint.z - game.position.z;
     var direction = Math.atan2(dx, dz);
-    var relative = ((direction - game.yaw + Math.PI) % (Math.PI * 2)) - Math.PI;
+    var relative = ((direction - game.heading + Math.PI) % (Math.PI * 2)) - Math.PI;
     var arrows = ['↑', '↗', '→', '↘', '↓', '↙', '←', '↖'];
     var index = Math.round(relative / (Math.PI / 4));
     index = (index % 8 + 8) % 8;
@@ -2293,7 +2344,7 @@
     });
     ctx.save();
     ctx.translate(mapX(game.position.x), mapZ(game.position.z));
-    ctx.rotate(-game.yaw);
+    ctx.rotate(-game.heading);
     ctx.fillStyle = '#73f4ff';
     ctx.beginPath(); ctx.moveTo(0, 5); ctx.lineTo(-3.5, -3); ctx.lineTo(3.5, -3); ctx.closePath(); ctx.fill();
     ctx.restore();
